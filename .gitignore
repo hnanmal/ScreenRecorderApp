@@ -1,0 +1,46 @@
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# 📦 가상환경
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# 🔧 IDE / 에디터 설정
+.vscode/
+.idea/
+*.swp
+*~
+
+# 🧪 테스트/실험 파일
+*.log
+*.tmp
+*.bak
+*.old
+*.orig
+
+# 📷 녹화된 영상 파일
+*.avi
+*.mp4
+*.mov
+
+# 🧪 Jupyter (혹시 쓸 경우)
+.ipynb_checkpoints/
+
+# 📁 OS 시스템 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 📦 패키지 잠금/캐시
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 🔒 환경 설정 파일
+.env
