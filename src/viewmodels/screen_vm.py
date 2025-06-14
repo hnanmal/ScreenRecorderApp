@@ -7,6 +7,7 @@ class ScreenRecorderViewModel:
     def __init__(self):
         self.recorder = ScreenRecorder()
         self.is_recording = False
+        self.region = None
 
     def start_recording(self, on_done=None):
         self.is_recording = True
@@ -14,10 +15,14 @@ class ScreenRecorderViewModel:
         self.thread.start()
 
     def _record_and_notify(self, on_done):
-        self.recorder.start()
+        # ✅ region 정보를 넘겨줌
+        self.recorder.start(region=self.region)
         if on_done:
             on_done()
 
     def stop_recording(self):
         self.recorder.stop()
         self.is_recording = False
+
+    def set_region(self, region):
+        self.region = region
