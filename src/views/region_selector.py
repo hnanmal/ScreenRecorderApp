@@ -1,6 +1,7 @@
 # src/views/region_selector.py
 import tkinter as tk
 
+
 class RegionSelector:
     def __init__(self):
         self.root = tk.Toplevel()
@@ -10,6 +11,8 @@ class RegionSelector:
         self.root.attributes("-topmost", True)
         self.root.title("녹화 영역 선택")
         self.root.bind("<Escape>", lambda e: self.root.destroy())
+        self.root.withdrawn = False  # 추가
+        self.selected_region = None
 
         self.start_x = self.start_y = 0
         self.rect_id = None
@@ -27,7 +30,14 @@ class RegionSelector:
         self.start_y = self.canvas.canvasy(event.y)
         if self.rect_id:
             self.canvas.delete(self.rect_id)
-        self.rect_id = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="red", width=2)
+        self.rect_id = self.canvas.create_rectangle(
+            self.start_x,
+            self.start_y,
+            self.start_x,
+            self.start_y,
+            outline="red",
+            width=2,
+        )
 
     def on_drag(self, event):
         cur_x = self.canvas.canvasx(event.x)
@@ -43,10 +53,15 @@ class RegionSelector:
         y = min(y1, y2)
         w = abs(x2 - x1)
         h = abs(y2 - y1)
+
         self.selected_region = (x, y, w, h)
+        self.region_selected = True
         print(f"Selected region: {self.selected_region}")
-        self.root.destroy()
+        self.root.quit()  # ✅ mainloop를 먼저 종료
+
+        self.root.destroy()  # 반드시 닫기
 
     def select_region(self):
         self.root.mainloop()
+        print(f"[DEBUG] return self.selected_region: {self.selected_region}")
         return self.selected_region
