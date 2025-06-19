@@ -1,0 +1,9 @@
+📁 src/
+    📁 services/
+        📄 recorder.py
+    📁 viewmodels/
+        📄 screen_vm.py
+    📁 views/
+        📄 main_view.py
+        📄 overlay_box.py
+        📄 region_selector.py

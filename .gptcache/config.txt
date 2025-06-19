@@ -1,0 +1,6 @@
+- language: Python
+- notebooks: False
+- file_count: 8
+- js_detected: False
+- html_detected: False
+- python_detected: True

@@ -3,6 +3,9 @@ import mss
 import cv2
 import numpy as np
 import datetime
+import win32api
+import win32gui
+from PIL import Image, ImageDraw
 
 
 class ScreenRecorder:
@@ -57,12 +60,47 @@ class ScreenRecorder:
             while self.recording:
                 try:
                     sct_img = sct.grab(monitor_dict)
-                    frame = np.array(sct_img)
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-                    self.out.write(frame)
+                    frame = np.array(sct_img)  # BGRA
+
+                    # ✅ PIL 이미지로 변환하여 커서 합성
+                    pil_img = Image.fromarray(frame)
+
+                    # 마우스 커서 좌표
+                    cx, cy = win32api.GetCursorPos()
+
+                    # 모니터 좌상단 기준으로 상대좌표로 변환
+                    rel_x = cx - monitor_dict["left"]
+                    rel_y = cy - monitor_dict["top"]
+
+                    if (
+                        0 <= rel_x < monitor_dict["width"]
+                        and 0 <= rel_y < monitor_dict["height"]
+                    ):
+                        draw = ImageDraw.Draw(pil_img)
+                        draw.ellipse(
+                            (rel_x - 5, rel_y - 5, rel_x + 5, rel_y + 5), fill="red"
+                        )
+
+                    # 다시 numpy로 변환 후 BGR 색공간으로 변환
+                    frame_with_cursor = cv2.cvtColor(
+                        np.array(pil_img), cv2.COLOR_RGBA2BGR
+                    )
+
+                    self.out.write(frame_with_cursor)
+
                 except Exception as e:
                     print(f"[ERROR] 캡처 오류: {e}")
                     break
+
+            # while self.recording:
+            #     try:
+            #         sct_img = sct.grab(monitor_dict)
+            #         frame = np.array(sct_img)
+            #         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+            #         self.out.write(frame)
+            #     except Exception as e:
+            #         print(f"[ERROR] 캡처 오류: {e}")
+            #         break
 
             self.out.release()
             print("[INFO] 녹화 완료:", filename)

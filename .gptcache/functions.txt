@@ -1,0 +1,32 @@
+
+📄 services\recorder.py
+  - def __init__()
+  - def start()
+  - def stop()
+  - def _detect_monitor()
+
+📄 viewmodels\screen_vm.py
+  - def __init__()
+  - def set_region()
+  - def start_recording()
+  - def _record_and_notify()
+  - def stop_recording()
+
+📄 views\main_view.py
+  - def __init__()
+  - def select_region()
+  - def create_overlay_box()
+  - def start()
+  - def stop()
+  - def recording_finished()
+
+📄 views\overlay_box.py
+  - def __init__()
+  - def close()
+
+📄 views\region_selector.py
+  - def __init__()
+  - def on_start()
+  - def on_drag()
+  - def on_release()
+  - def select_region()
