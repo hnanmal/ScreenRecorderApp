@@ -52,8 +52,11 @@ class ScreenRecorder:
                 print(f"[DEBUG] 전체 화면 녹화 시작: {monitor}")
 
             # 🔴 VideoWriter 설정
-            filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.avi")
-            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            # filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.avi")
+            # fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.mp4")
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
             self.out = cv2.VideoWriter(filename, fourcc, 10.0, screen_size)
             self.recording = True
 
