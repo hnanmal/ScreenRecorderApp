@@ -1,11 +1,21 @@
-# src/services/recorder.py
+import sys
 import mss
 import cv2
 import numpy as np
 import datetime
+import time
+import os
+import subprocess
 import win32api
-import win32gui
 from PIL import Image, ImageDraw
+
+
+def get_ffmpeg_path():
+    if getattr(sys, "frozen", False):  # PyInstaller 패키징된 실행파일
+        base_path = sys._MEIPASS
+        return os.path.join(base_path, "resources", "bin", "ffmpeg.exe")
+    else:
+        return os.path.join("resources", "bin", "ffmpeg.exe")
 
 
 class ScreenRecorder:
@@ -18,8 +28,7 @@ class ScreenRecorder:
         with mss.mss() as sct:
             if region:
                 x, y, w, h = map(int, region)
-                # 💡 다중 모니터 환경 고려
-                for monitor in sct.monitors[1:]:  # monitors[0]은 전체, [1:]은 개별
+                for monitor in sct.monitors[1:]:
                     mx, my, mw, mh = (
                         monitor["left"],
                         monitor["top"],
@@ -27,9 +36,7 @@ class ScreenRecorder:
                         monitor["height"],
                     )
                     if mx <= x < mx + mw and my <= y < my + mh:
-                        # 보정된 전체 좌표로 변환
-                        abs_x = x
-                        abs_y = y
+                        abs_x, abs_y = x, y
                         monitor_dict = {
                             "top": abs_y,
                             "left": abs_x,
@@ -43,7 +50,6 @@ class ScreenRecorder:
                         "[WARNING] 선택 영역이 어떤 모니터에도 속하지 않음. 기본 모니터 사용"
                     )
                     monitor_dict = {"top": y, "left": x, "width": w, "height": h}
-
                 screen_size = (w, h)
             else:
                 monitor = sct.monitors[1]
@@ -51,27 +57,22 @@ class ScreenRecorder:
                 screen_size = (monitor["width"], monitor["height"])
                 print(f"[DEBUG] 전체 화면 녹화 시작: {monitor}")
 
-            # 🔴 VideoWriter 설정
-            # filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.avi")
-            # fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            # 파일명 및 코덱 설정
             filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.mp4")
             fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-
             self.out = cv2.VideoWriter(filename, fourcc, 10.0, screen_size)
             self.recording = True
 
+            fps = 10.0
+
             while self.recording:
+                start_time = time.time()
                 try:
                     sct_img = sct.grab(monitor_dict)
-                    frame = np.array(sct_img)  # BGRA
+                    frame = np.array(sct_img)  # BGRA → PIL
 
-                    # ✅ PIL 이미지로 변환하여 커서 합성
                     pil_img = Image.fromarray(frame)
-
-                    # 마우스 커서 좌표
                     cx, cy = win32api.GetCursorPos()
-
-                    # 모니터 좌상단 기준으로 상대좌표로 변환
                     rel_x = cx - monitor_dict["left"]
                     rel_y = cy - monitor_dict["top"]
 
@@ -84,29 +85,47 @@ class ScreenRecorder:
                             (rel_x - 5, rel_y - 5, rel_x + 5, rel_y + 5), fill="red"
                         )
 
-                    # 다시 numpy로 변환 후 BGR 색공간으로 변환
                     frame_with_cursor = cv2.cvtColor(
                         np.array(pil_img), cv2.COLOR_RGBA2BGR
                     )
-
                     self.out.write(frame_with_cursor)
 
                 except Exception as e:
                     print(f"[ERROR] 캡처 오류: {e}")
                     break
 
-            # while self.recording:
-            #     try:
-            #         sct_img = sct.grab(monitor_dict)
-            #         frame = np.array(sct_img)
-            #         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-            #         self.out.write(frame)
-            #     except Exception as e:
-            #         print(f"[ERROR] 캡처 오류: {e}")
-            #         break
+                # 일정한 프레임 간격 유지
+                elapsed = time.time() - start_time
+                time.sleep(max(0, 1.0 / fps - elapsed))
 
             self.out.release()
             print("[INFO] 녹화 완료:", filename)
+
+            # 🔁 ffmpeg로 재인코딩 (PowerPoint 최적화)
+            self.reencode_with_ffmpeg(filename)
+
+    def reencode_with_ffmpeg(self, input_path):
+        output_path = input_path.replace(".mp4", "_fixed.mp4")
+        cmd = [
+            get_ffmpeg_path(),
+            "-y",
+            "-i",
+            input_path,
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-r",
+            "30",
+            output_path,
+        ]
+        try:
+            subprocess.run(cmd, check=True)
+            os.remove(input_path)
+            os.rename(output_path, input_path)
+            print(f"[INFO] ffmpeg 재인코딩 완료 및 저장: {input_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"[ERROR] ffmpeg 인코딩 실패: {e}")
 
     def stop(self):
         self.recording = False
