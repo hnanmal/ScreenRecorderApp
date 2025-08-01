@@ -1,14 +1,34 @@
 # src/views/main_view.py
 import datetime
 import os
+import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
 
 # from ttkbootstrap import ttk
 from src.viewmodels.screen_vm import ScreenRecorderViewModel
 from src.views.region_selector import RegionSelector
 from src.views.overlay_box import OverlayBox  # 👈 추가
+
+
+def check_thread():
+    print(f"현재 스레드: {threading.current_thread().name}")
+    if threading.current_thread() == threading.main_thread():
+        print("🟢 메인 스레드에서 실행 중")
+    else:
+        print("🔴 백그라운드 스레드에서 실행 중")
+
+
+def safe_after(root, delay, callback):
+    try:
+        if isinstance(root, tk.Tk) and root.winfo_exists():
+            root.after(delay, callback)
+        else:
+            print("[WARN] root is not alive or not a Tk instance")
+    except Exception as e:
+        print(f"[ERROR] safe_after 실패: {e}")
 
 
 class ScreenRecorderView:
@@ -18,7 +38,7 @@ class ScreenRecorderView:
         self.root.geometry("300x250")
         self.overlay = None  # 반드시 추가
 
-        self.vm = ScreenRecorderViewModel()
+        self.vm = ScreenRecorderViewModel(root)
 
         # 📦 영역 선택 버튼
         self.select_button = ttk.Button(
@@ -107,7 +127,11 @@ class ScreenRecorderView:
         self.status_label.config(text="녹화 중...")
 
         # 녹화 시작
-        self.vm.start_recording(on_done=self.recording_finished)
+        # self.vm.start_recording(on_done=self.recording_finished)
+        self.vm.start_recording(
+            # on_done=lambda: self.root.after(0, self.recording_finished)
+            on_done=lambda: safe_after(self.root, 0, self.recording_finished)
+        )
 
     def stop(self):
         self.vm.stop_recording()
@@ -122,3 +146,14 @@ class ScreenRecorderView:
 
     def recording_finished(self):
         pass
+        # print("[DEBUG] recording_finished() 진입")
+        # if self.overlay:
+        #     print("[DEBUG] overlay 닫는 중")
+        #     self.overlay.close()
+        #     self.overlay = None
+
+        # def show_message():
+        #     print("[DEBUG] 메시지박스 호출 시도")
+        #     messagebox.showinfo("알림", "녹화 저장 완료", parent=self.root)
+
+        # self.root.after(0, show_message)

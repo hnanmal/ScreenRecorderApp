@@ -1,4 +1,5 @@
 import sys
+from tkinter import messagebox
 import mss
 import cv2
 import numpy as np
@@ -19,7 +20,8 @@ def get_ffmpeg_path():
 
 
 class ScreenRecorder:
-    def __init__(self):
+    def __init__(self, root):
+        self.root = root
         self.recording = False
         self.out = None
         self.monitor = None
@@ -134,6 +136,7 @@ class ScreenRecorder:
             os.remove(input_path)
             os.rename(output_path, input_path)
             print(f"[INFO] ffmpeg 재인코딩 완료 및 저장: {input_path}")
+
         except subprocess.CalledProcessError as e:
             print(f"[ERROR] ffmpeg 인코딩 실패: {e}")
 

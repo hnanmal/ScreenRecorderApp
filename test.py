@@ -1,20 +1,20 @@
 import tkinter as tk
+import threading
+from tkinter import messagebox
+
+
+def background_task(root):
+    def show_message():
+        messagebox.showinfo("완료", "작업이 끝났습니다.")
+
+    # 안전하게 main thread에서 실행
+    root.after(0, show_message)
+
 
 root = tk.Tk()
-root.withdraw()  # 숨김
-
-win = tk.Toplevel()
-win.overrideredirect(True)
-win.attributes("-topmost", True)
-
-win.configure(bg="magenta")
-win.attributes("-transparentcolor", "magenta")  # Windows only
-
-win.geometry("400x300+300+200")
-
-canvas = tk.Canvas(win, width=400, height=300, bg="magenta", highlightthickness=0)
-canvas.pack(fill=tk.BOTH, expand=True)
-
-canvas.create_rectangle(2, 2, 398, 298, outline="red", width=4)
-
+tk.Button(
+    root,
+    text="작업 시작",
+    command=lambda: threading.Thread(target=background_task, args=(root,)).start(),
+).pack()
 root.mainloop()

@@ -1,7 +1,7 @@
 import tkinter as tk
 
 # from ttkbootstrap import Style
-from src.views.main_view import ScreenRecorderView
+from src.views.main_view import ScreenRecorderView, check_thread
 from src.views.overlay_box import OverlayBox
 
 if __name__ == "__main__":
@@ -9,6 +9,7 @@ if __name__ == "__main__":
     # style = Style("cosmo")
     app = ScreenRecorderView(root)
     root.mainloop()
+    check_thread()
 
 
 # if __name__ == "__main__":

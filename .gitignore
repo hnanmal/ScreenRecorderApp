@@ -44,3 +44,17 @@ pip-delete-this-directory.txt
 
 # 🔒 환경 설정 파일
 .env
+
+# 🧊 PyInstaller 빌드 산출물
+*.spec
+build/
+dist/
+*.pyz
+*.toc
+*.dll
+*.manifest
+
+# 📦 Inno Setup 출력
+installer/
+Output/
+setup.exe
