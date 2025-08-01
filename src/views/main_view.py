@@ -1,6 +1,9 @@
 # src/views/main_view.py
+import datetime
+import os
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 
 # from ttkbootstrap import ttk
 from src.viewmodels.screen_vm import ScreenRecorderViewModel
@@ -69,12 +72,34 @@ class ScreenRecorderView:
         print(f"[OverlayBox] 진짜 생성 시작")
         self.overlay = OverlayBox(x, y, w, h)
 
+    # def start(self):
+    #     self.start_button.config(state=tk.DISABLED)
+    #     self.stop_button.config(state=tk.NORMAL)
+    #     self.status_label.config(text="녹화 중...")
+
+    #     # ✅ 녹화 중 Overlay 유지 – 아무것도 하지 않음
+    #     self.vm.start_recording(on_done=self.recording_finished)
+
     def start(self):
+        # 🔽 폴더 선택 다이얼로그 표시
+        folder = filedialog.askdirectory(title="녹화 파일 저장 폴더 선택")
+        if not folder:
+            self.status_label.config(text="저장 취소됨")
+            return  # 사용자가 취소한 경우 녹화 시작하지 않음
+
+        # 🔽 자동 파일명 생성
+        filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.mp4")
+        full_path = os.path.join(folder, filename)
+
+        # 🔽 ViewModel에 경로 전달
+        self.vm.set_output_path(full_path)
+
+        # 🔽 버튼 상태 및 UI 전환
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
         self.status_label.config(text="녹화 중...")
 
-        # ✅ 녹화 중 Overlay 유지 – 아무것도 하지 않음
+        # 녹화 시작
         self.vm.start_recording(on_done=self.recording_finished)
 
     def stop(self):

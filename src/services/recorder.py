@@ -24,7 +24,13 @@ class ScreenRecorder:
         self.out = None
         self.monitor = None
 
-    def start(self, region=None):
+    def set_output_path(self, path):
+        self.output_path = path
+
+    def start_recording(self):
+        self.recorder.start(region=self.region, output_path=self.output_path)
+
+    def start(self, region=None, output_path=None):
         with mss.mss() as sct:
             if region:
                 x, y, w, h = map(int, region)
@@ -58,7 +64,8 @@ class ScreenRecorder:
                 print(f"[DEBUG] 전체 화면 녹화 시작: {monitor}")
 
             # 파일명 및 코덱 설정
-            filename = datetime.datetime.now().strftime("recording_%Y%m%d_%H%M%S.mp4")
+            filename = output_path  # ✅ output_path는 파일 전체 경로!
+
             fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             self.out = cv2.VideoWriter(filename, fourcc, 10.0, screen_size)
             self.recording = True
@@ -105,7 +112,9 @@ class ScreenRecorder:
             self.reencode_with_ffmpeg(filename)
 
     def reencode_with_ffmpeg(self, input_path):
-        output_path = input_path.replace(".mp4", "_fixed.mp4")
+        # output_path = input_path.replace(".mp4", "_fixed.mp4")
+        base, ext = os.path.splitext(input_path)
+        output_path = f"{base}_fixed{ext}"
         cmd = [
             get_ffmpeg_path(),
             "-y",

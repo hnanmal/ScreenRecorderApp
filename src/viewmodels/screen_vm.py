@@ -26,7 +26,7 @@ class ScreenRecorderViewModel:
         self.thread.start()
 
     def _record_and_notify(self, on_done):
-        self.recorder.start(region=self.region)
+        self.recorder.start(region=self.region, output_path=self.output_path)  # ✅ 수정
         if on_done:
             on_done()
 
@@ -38,3 +38,6 @@ class ScreenRecorderViewModel:
         if self.overlay:
             self.overlay.close()
             self.overlay = None
+
+    def set_output_path(self, path):
+        self.output_path = path
