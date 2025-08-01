@@ -17,10 +17,10 @@ class ScreenRecorderViewModel:
     def start_recording(self, on_done=None):
         self.is_recording = True
 
-        # ✅ 녹화 영역 오버레이 표시
-        if self.region:
-            x, y, w, h = map(int, self.region)
-            self.overlay = OverlayBox(x, y, w, h)
+        # # ✅ 녹화 영역 오버레이 표시
+        # if self.region:
+        #     x, y, w, h = map(int, self.region)
+        #     self.overlay = OverlayBox(x, y, w, h)
 
         self.thread = threading.Thread(target=self._record_and_notify, args=(on_done,))
         self.thread.start()

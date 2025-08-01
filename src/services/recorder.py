@@ -43,6 +43,7 @@ class ScreenRecorder:
                     )
                     if mx <= x < mx + mw and my <= y < my + mh:
                         abs_x, abs_y = x, y
+                        offset = 2
                         monitor_dict = {
                             "top": abs_y,
                             "left": abs_x,

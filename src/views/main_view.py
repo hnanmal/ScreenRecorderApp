@@ -68,17 +68,24 @@ class ScreenRecorderView:
             print("[DEBUG] OverlayBox 생성 예약")
             self.root.after(10, lambda: self.create_overlay_box(x, y, w, h))
 
+    # def create_overlay_box(self, x, y, w, h):
+    #     print(f"[OverlayBox] 진짜 생성 시작")
+    #     self.overlay = OverlayBox(x, y, w, h)
+
     def create_overlay_box(self, x, y, w, h):
-        print(f"[OverlayBox] 진짜 생성 시작")
-        self.overlay = OverlayBox(x, y, w, h)
+        # ✅ 기존 Overlay가 있으면 닫기
+        if self.overlay:
+            self.overlay.close()
+            self.overlay = None
 
-    # def start(self):
-    #     self.start_button.config(state=tk.DISABLED)
-    #     self.stop_button.config(state=tk.NORMAL)
-    #     self.status_label.config(text="녹화 중...")
+        offset = 5  # 오프셋 픽셀 수 (화면 확대율에 따라 조정 가능)
+        ox, oy = x - offset, y - offset
+        ow, oh = w + 2 * offset, h + 2 * offset
 
-    #     # ✅ 녹화 중 Overlay 유지 – 아무것도 하지 않음
-    #     self.vm.start_recording(on_done=self.recording_finished)
+        print(f"[OverlayBox] 실제 녹화 영역: {x}, {y}, {w}, {h}")
+        print(f"[OverlayBox] 박스 오버레이 영역: {ox}, {oy}, {ow}, {oh}")
+
+        self.overlay = OverlayBox(ox, oy, ow, oh)
 
     def start(self):
         # 🔽 폴더 선택 다이얼로그 표시
